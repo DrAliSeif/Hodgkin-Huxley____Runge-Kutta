@@ -1,17 +1,15 @@
 /************************************************************************************************/
-/*** Topic: Wang-Buzsaki model with Runge-Kutta 4th Order Method for one neuron    Ali-Seif   ***/
+/*** Topic: Hodgkin-Huxley model with Runge-Kutta 4th Order Method for one neuron    Ali-Seif ***/
 /*** Version Release 17.12 rev 11256                                                          ***/
-/*** Date: 11/10/2020                                                                         ***/
+/*** Date: 12/3/2020                                                                          ***/
 /*** Code implemented in CodeBlocks C++ compiler (v. 17.12),                                  ***/
 /*** MSI: PX60 6QD/ DDR4                                                                      ***/
-/*** Run under a Intel® Core™ i7-6700HQ CPU @ 2.60GHz × 64 based processor with 16 GB RAM     ***/
+/*** Run under a IntelÂ® Coreâ„¢ i7-6700HQ CPU @ 2.60GHz Ã— 64 based processor with 16 GB RAM     ***/
 /************************************************************************************************/
-#include <iostream>
-#include <math.h>
-#include <fstream>
-
+#include <iostream>                                             //for cout
+#include <math.h>                                               //for pow()
+#include <fstream>                                              //for ofstream
 using namespace std;                                            //for Standard program
-
 //##############################################################
 //####                                                      ####
 //####                 Create class Neuron                  ####
@@ -28,6 +26,7 @@ class Neuron
 		double Ek = -72.14;
         double Cm = 1.0;
         double Iapp= 6.5;
+        double  k1, k2, k3, k4;
 	public:
         void onedt(void);
 		double alpha_n(double);
@@ -86,7 +85,6 @@ double Neuron::dmdt(double t, double m, double v){return   ((alpha_m(v)*(1-m))-b
 //__________________________________Runge-Kutta calculations_________________________________//
 
 double Neuron::rk4thOrder_v(double t0, double v, double dt,double n,double h,double m) {
-    double  k1, k2, k3, k4;
             k1=     dt*dvdt(t0, v,n,h,m);
             k2=     dt*dvdt((t0+dt/2), (v+k1/2),n,h,m);
             k3=     dt*dvdt((t0+dt/2), (v+k2/2),n,h,m);
@@ -94,16 +92,13 @@ double Neuron::rk4thOrder_v(double t0, double v, double dt,double n,double h,dou
             v=      v+double((1.0/6.0)*(k1+2*k2+2*k3+k4));
    return   v;}
 double Neuron::rk4thOrder_n(double t0, double v, double dt, double n) {
-    double  k1, k2, k3, k4;
             k1=     dt*dndt(t0, n,v);
             k2=     dt*dndt((t0+dt/2), (n+k1/2),v);
             k3=     dt*dndt((t0+dt/2), (n+k2/2),v);
             k4=     dt*dndt((t0+dt), (n+k3),v);
             n=      n+double((1.0/6.0)*(k1+2*k2+2*k3+k4));
    return   n;}
-
 double Neuron::rk4thOrder_h(double t0, double v, double dt,double h) {
-    double  k1, k2, k3, k4;
             k1=     dt*dhdt(t0, h,v);
             k2=     dt*dhdt((t0+dt/2), (h+k1/2),v);
             k3=     dt*dhdt((t0+dt/2), (h+k2/2),v);
@@ -111,30 +106,20 @@ double Neuron::rk4thOrder_h(double t0, double v, double dt,double h) {
             h=      h+double((1.0/6.0)*(k1+2*k2+2*k3+k4));
     return   h;}
 double Neuron::rk4thOrder_m(double t0, double v, double dt,double m) {
-    double  k1, k2, k3, k4;
             k1=     dt*dmdt(t0, m,v);
             k2=     dt*dmdt((t0+dt/2), (m+k1/2),v);
             k3=     dt*dmdt((t0+dt/2), (m+k2/2),v);
             k4=     dt*dmdt((t0+dt), (m+k3),v);
             m=      m+double((1.0/6.0)*(k1+2*k2+2*k3+k4));
     return   m;}
+//_________________________________One step run calculations_________________________________//
 
-//__________________________________Runge-Kutta calculations_________________________________//
 void Neuron::onedt(){
     v=rk4thOrder_v(t0, v, dt,n,h,m);
     n=rk4thOrder_n(t0,v, dt ,n);
     h=rk4thOrder_h(t0, v, dt ,h);
     m=rk4thOrder_m(t0, v, dt ,m);
     }
-
-
-
-
-
-
-
-
-
 //_______________________________________________________________________________________\\
 //_____________                                                             _____________\\
 //_____________                                      @                      _____________\\
@@ -148,7 +133,6 @@ void Neuron::onedt(){
 
 int main() {
 
-
     Neuron neuron;
     ofstream temp("temp.txt", ios::out | ios::trunc);
 
@@ -161,12 +145,7 @@ int main() {
 
         neuron.onedt();
         temp << neuron.t0 << '\t' <<neuron.v<< endl;
-
     }
-
-
-
-
     temp.close();
     cout << "\nFinish" << endl;
 
